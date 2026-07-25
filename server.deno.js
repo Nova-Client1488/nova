@@ -130,17 +130,19 @@ function licenseValid(u) {
 
 // ===== SEED OWNER =====
 async function seedOwner() {
-  const users = await getUsers();
-  if (!users.find(u => u.username.toLowerCase() === 'n1x')) {
-    const hash = await hashPassword('samturail');
-    users.push({
-      id: 1, username: 'N1x', passwordHash: hash, role: 'owner', hwid: null,
-      license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now()
-    });
-    await setUsers(users);
-    await setCounter(2);
-    console.log('Owner N1x created');
-  }
+  try {
+    const users = await getUsers();
+    if (!users.find(u => u.username.toLowerCase() === 'n1x')) {
+      const hash = await hashPassword('samturail');
+      users.push({
+        id: 1, username: 'N1x', passwordHash: hash, role: 'owner', hwid: null,
+        license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now()
+      });
+      await setUsers(users);
+      await setCounter(2);
+      console.log('Owner N1x created');
+    }
+  } catch (e) { console.log('seedOwner failed:', e.message); }
 }
 await seedOwner();
 
@@ -157,8 +159,8 @@ const serve = async (req) => {
     try { return JSON.parse(await req.text()); } catch { return {}; }
   };
   const sendJson = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
-  const sendFile = (filePath, contentType) => {
-    try { return new Response(Deno.readTextFileSync(filePath), { headers: { 'Content-Type': contentType } }); }
+  const sendFile = async (filePath, contentType) => {
+    try { return new Response(await Deno.readTextFile(filePath), { headers: { 'Content-Type': contentType } }); }
     catch { return new Response('Not found', { status: 404 }); }
   };
 
@@ -358,7 +360,7 @@ const serve = async (req) => {
 
 // SPA routes
   const spaRoutes = ['/login', '/register', '/dashboard', '/checkout', '/purchase', '/admin', '/pricing'];
-  if (method === 'GET' && spaRoutes.includes(path)) return sendFile('public/index.html', 'text/html');
+  if (method === 'GET' && spaRoutes.includes(path)) return await sendFile('public/index.html', 'text/html');
 
   // Static files - serve from public/ directly (no Deno Deploy static dir needed)
   if (method === 'GET') {
