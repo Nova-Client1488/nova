@@ -1,80 +1,60 @@
-# Nova Web — деплой на Oracle Cloud (Always Free)
+# Nova Web — деплой на Deno Deploy (бесплатно, без sleep, без карты)
 
 ## Что получишь
-- VM Oracle Cloud Always Free (AMD Ampere A1, 4 OCPU / 24GB RAM — бесплатно навсегда)
-- Сайт Nova Client на постоянном IP (не спит, не ложится)
-- URL: `http://VM_IP:3000`
+- Сайт на постоянном URL `nova-web.deno.dev` (или свой домен)
+- Не спит, не ложится, бесплатно навсегда
+- БД: Deno KV (встроенная, persistent, бесплатно)
+- Без карты/адреса — только GitHub
 
-## Шаг 1 — Создать аккаунт Oracle Cloud
-1. Зайди на https://cloud.oracle.com → Sign Up
-2. Верифицируй карту (снимут $1 и вернут — не спишут)
-3. Подтверди email/телефон
+## Шаг 1 — Создать GitHub repo
+1. Зайди на https://github.com → New repository
+2. Name: `nova-web` → Public → Create
+3. Загрузи все файлы из `C:\Users\rudoy\Desktop\Nova Web` (кроме `node_modules/`, `db.json`, `package-lock.json`)
+4. Нужные файлы: `server.deno.js`, `deno.json`, `public/` (index.html, style.css, app.js), `downloads/` (с nova-client.jar)
 
-## Шаг 2 — Создать VM
-1. Console → Compute → Instances → Create Instance
-2. Name: `nova-web`
-3. Shape: **VM.Standard.A1.Flex** (Ampere) — 2 OCPU, 12 GB RAM (бесплатно)
-4. Image: **Canonical Ubuntu 22.04**
-5. SSH keys: Save private key (скачается)
-6. Create
+## Шаг 2 — Подключить Deno Deploy
+1. Зайди на https://dash.deno.com → Sign in with GitHub
+2. New Project → выбери repo `nova-web`
+3. Entrypoint: `server.deno.js`
+4. Deploy — получишь URL `nova-web.deno.dev`
 
-## Шаг 3 — Открыть порт 3000
-1. Console → Networking → Virtual Cloud Networks → default VCN → Security Lists → Default Security List
-2. Add Ingress Rule:
-   - Source CIDR: `0.0.0.0/0`
-   - IP Protocol: `TCP`
-   - Destination Port Range: `3000`
-3. Save
+## Шаг 3 — Активировать Deno KV
+1. В dashboard Deno Deploy → твой project → KV
+2. Create database → name `nova` → Connect
+3. Deno KV автоматически persistent (данные не теряются)
 
-## Шаг 4 — Залиться на VM
-```bash
-ssh -i path/to/private-key ubuntu@VM_PUBLIC_IP
-```
+## Шаг 4 — Настроить env vars
+В dashboard → project → Settings → Environment Variables:
+- `JWT_SECRET` = случайная строка (например `nova-CHANGE-2026-secret-xyz`)
+- `PORT` = `8000` (Deno Deploy сам подставит, можно не указывать)
 
-## Шаг 5 — Запустить деплой
-```bash
-# Скачать deploy скрипт
-curl -fsSL https://raw.githubusercontent.com/CHANGEME/nova-web/main/deploy.sh -o deploy.sh
-# Или вручную (после git clone) — отредактируй GitHub URL в deploy.sh
-sed -i 's/CHANGEME/YOUR_GITHUB_USER/g' deploy.sh
-bash deploy.sh
-```
-
-Скрипт сам:
-- Установит Node.js 20, PM2, git
-- Склонирует проект
-- Установит зависимости
-- Запустит сайт через PM2 (авторестарт, автозапуск при загрузке)
-- Откроет порт 3000 в iptables
+## Шаг 5 — Загрузить jar
+1. В repo создай папку `downloads/`
+2. Загрузи туда `nova-client.jar` (из `C:\Users\rudoy\Desktop\Nova Web\downloads\nova-client.jar`)
+3. Commit → Deno Deploy автоматически пересоберёт
 
 ## Шаг 6 — Проверить
-Открой в браузере: `http://VM_PUBLIC_IP:3000`
-
-## Управление
-```bash
-pm2 status              # статус
-pm2 logs nova-web       # логи
-pm2 restart nova-web    # рестарт
-pm2 stop nova-web      # стоп
-```
-
-## MongoDB (опционально — persistent DB)
-По умолчанию сайт использует `db.json` (файл). Если хочешь MongoDB Atlas:
-1. Создай free cluster на https://mongodb.com/atlas
-2. Получи connection string
-3. В `/opt/nova-web/ecosystem.config.js` впиши `MONGODB_URI: 'mongodb+srv://...'`
-4. `pm2 restart nova-web`
-
-Без MongoDB — `db.json` работает на persistent volume VM Oracle (не теряется).
+Открой `https://nova-web.deno.dev` — сайт работает.
+Логин: `N1x` / `samturail` (Owner, lifetime)
 
 ## Обновление сайта
-```bash
-cd /opt/nova-web
-git pull
-pm2 restart nova-web
-```
+- Push в GitHub repo → Deno Deploy автоматически пересоберёт
+- Или в dashboard → Deploy → Redeploy
 
-## Важно
-- В `deploy.sh` замени `CHANGEME` на свой GitHub username
-- В `ecosystem.config.js` поменяй `JWT_SECRET` на случайную строку
-- GitHub repo должен быть публичным (или добавь SSH deploy key)
+## Обновление jar (когда выпускаешь обнову)
+1. Собери новую jar: `gradlew build` (на твоём ПК)
+2. Скопируй `nova-client-0.1.0.jar` → `downloads/nova-client.jar` в repo
+3. В `server.deno.js` подними `CLIENT_VERSION` (например `'0.2.0'`)
+4. Commit + push → Deno Deploy пересоберёт → юзеры получат "Обновить"
+
+## Лаунчер
+В лаунчере (main.js) поменяй API URL на `https://nova-web.deno.dev`:
+```js
+const API = 'https://nova-web.deno.dev';
+```
+Пересобери лаунчер.
+
+## Управление
+- Логи: dashboard → Logs
+- Рестарт: dashboard → Deploy → Redeploy
+- Env vars: dashboard → Settings → Environment Variables
