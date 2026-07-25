@@ -135,7 +135,8 @@ await seedOwner();
 // ===== SERVER =====
 const serve = async (req) => {
   const url = new URL(req.url);
-  const path = url.pathname;
+  let path = url.pathname;
+  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
   const method = req.method;
 
   // CORS + JSON
@@ -198,7 +199,7 @@ const serve = async (req) => {
   }
 
   // ===== PLANS / PROMO =====
-  if (path === '/api/plans' && method === 'GET') return sendJson(PLANS);
+  if ((path === '/api/plans' || path === '/api/plans/') && method === 'GET') return sendJson(PLANS);
   if (path === '/api/config' && method === 'GET') return sendJson({
     telegram: TELEGRAM, cardNumber: CARD_NUMBER, plans: PLANS,
     paymentProvider: PAYMENT_PROVIDER, usdtWallet: USDT_WALLET, usdtNetwork: USDT_NETWORK, usdRates: USD_RATES, clientVersion: CLIENT_VERSION
