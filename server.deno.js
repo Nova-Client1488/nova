@@ -239,7 +239,17 @@ const serve = async (req) => {
     return sendJson({ error: 'API not found' }, 404);
   }
 
-  // ===== STATIC FILES — handled by Deno Deploy (Static directory: public), NOT here =====
+  // ===== STATIC FILES (server handles everything) =====
+  if (method === 'GET') {
+    const filePath = 'src' + (path === '/' ? '/index.html' : path);
+    const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
+    try {
+      const data = await Deno.readFile(filePath);
+      const ext = filePath.substring(filePath.lastIndexOf('.'));
+      return new Response(data, { headers: { 'Content-Type': types[ext] || 'application/octet-stream' } });
+    } catch {}
+  }
+
   return sendJson({ error: 'Not found' }, 404);
 };
 

@@ -1,8 +1,7 @@
 ﻿node_modules/
 db.json
-package-lock.json
+npm-debug.log*
+.DS_Store
+*.log
 .env
-downloads/NovaLauncher.zip
-downloads/*.zip
-*.zip
-
+package-lock.json
