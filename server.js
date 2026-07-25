@@ -399,4 +399,4 @@ app.get('/api/download/launcher', async (_, res) => {
 app.get(['/login','/register','/dashboard','/checkout','/purchase','/admin','/pricing'], (_, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.listen(PORT, () => console.log(`Nova Web: http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Nova Web: http://0.0.0.0:${PORT}`));
