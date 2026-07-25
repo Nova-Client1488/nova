@@ -213,6 +213,9 @@ const serve = async (req) => {
     paymentProvider: PAYMENT_PROVIDER, usdtWallet: USDT_WALLET, usdtNetwork: USDT_NETWORK, usdRates: USD_RATES, clientVersion: CLIENT_VERSION
   });
 
+  // Debug endpoint
+  if (path === '/api/debug' && method === 'GET') return sendJson({ path, method, url: req.url, pathLen: path.length, pathChars: [...path].map(c => c.charCodeAt(0)) });
+
   if (path === '/api/promo/validate' && method === 'POST') {
     const { code, planId } = await json();
     const promo = PROMOS[(code || '').trim()];
