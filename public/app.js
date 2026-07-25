@@ -80,10 +80,10 @@ function homePage() {
     <div class="features">
       <div class="feat"><div class="ico">⚔️</div><h3>Combat модули</h3><p>KillAura с умными ротациями, AutoSwap, Criticals — плавно и эффективно.</p></div>
       <div class="feat"><div class="ico">🎨</div><h3>Визуалы</h3><p>ESP, Chams, Skeleton, TargetESP, FullBright и красивый HUD с водяным знаком.</p></div>
-      <div class="feat"><div class="ico">🚀</div><h3>Лаунчер</h3><p>Свой Electron-лаунчер с авторизацией, выбором RAM и автообновлением конфигов.</p></div>
-      <div class="feat"><div class="ico">🛡️</div><h3>Байпасы</h3><p>Адаптация под античиты, ротации, GrimDelayHandler и пакетная система.</p></div>
+      <div class="feat"><div class="ico">🚀</div><h3>Лаунчер</h3><p>Свой лаунчер с авторизацией, выбором RAM и автообновлением конфигов.</p></div>
+      <div class="feat"><div class="ico">🛡️</div><h3>Байпасы</h3><p>Адаптация под античиты: Funtime, Grim, SpookyTime — ротации и обход ограничений.</p></div>
       <div class="feat"><div class="ico">💾</div><h3>Облачные конфиги</h3><p>Синхронизация настроек между устройствами через ваш аккаунт.</p></div>
-      <div class="feat"><div class="ico">🌙</div><h3>Темы</h3><p>Несколько тем оформления и кастомный UI с glassmorphism.</p></div>
+      <div class="feat"><div class="ico">🌙</div><h3>Темы</h3><p>Несколько тем оформления и кастомный UI.</p></div>
     </div>`;
 }
 
