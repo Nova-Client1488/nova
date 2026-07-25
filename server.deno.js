@@ -26,8 +26,18 @@ const PROMOS = {
   'Release': { discountPercent: 50, description: 'Релиз — скидка 50%' }
 };
 
-// ===== DENO KV STORE =====
-const kv = await Deno.openKv();
+// ===== DENO KV STORE (optional, fallback to in-memory) =====
+let kv = null;
+try {
+  kv = await Deno.openKv();
+} catch (e) {
+  console.log('KV not available, using in-memory store');
+}
+
+// In-memory fallback
+const memStore = { users: [], orders: [], counter: 1 };
+async function getMem(key) { return memStore[key]; }
+async function setMem(key, val) { memStore[key] = val; }
 
 // ===== CRYPTO HELPERS =====
 async function hashPassword(password) {
@@ -85,25 +95,28 @@ async function verifyJwt(token) {
 
 // ===== KV HELPERS =====
 async function getUsers() {
-  const res = await kv.get(['users']);
-  return res.value || [];
+  if (kv) { const res = await kv.get(['users']); return res.value || []; }
+  return await getMem('users');
 }
 async function setUsers(users) {
-  await kv.set(['users'], users);
+  if (kv) { await kv.set(['users'], users); return; }
+  await setMem('users', users);
 }
 async function getOrders() {
-  const res = await kv.get(['orders']);
-  return res.value || [];
+  if (kv) { const res = await kv.get(['orders']); return res.value || []; }
+  return await getMem('orders');
 }
 async function setOrders(orders) {
-  await kv.set(['orders'], orders);
+  if (kv) { await kv.set(['orders'], orders); return; }
+  await setMem('orders', orders);
 }
 async function getCounter() {
-  const res = await kv.get(['counter']);
-  return res.value || 1;
+  if (kv) { const res = await kv.get(['counter']); return res.value || 1; }
+  return await getMem('counter');
 }
 async function setCounter(c) {
-  await kv.set(['counter'], c);
+  if (kv) { await kv.set(['counter'], c); return; }
+  await setMem('counter', c);
 }
 
 function publicUser(u) {
