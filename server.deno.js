@@ -158,10 +158,17 @@ const serve = async (req) => {
   }
   const adminOnly = () => authUser && (authUser.role === 'owner' || authUser.role === 'admin');
 
-  // Static files
-  if (method === 'GET' && path === '/') return sendFile('public/index.html', 'text/html');
-  if (method === 'GET' && path === '/style.css') return sendFile('public/style.css', 'text/css');
-  if (method === 'GET' && path === '/app.js') return sendFile('public/app.js', 'application/javascript');
+  // Static files - serve from public/ directly (no Deno Deploy static dir needed)
+  if (method === 'GET') {
+    let filePath = 'public' + (path === '/' ? '/index.html' : path);
+    const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
+    try {
+      const data = await Deno.readFile(filePath);
+      const ext = filePath.substring(filePath.lastIndexOf('.'));
+      const contentType = types[ext] || 'application/octet-stream';
+      return new Response(data, { headers: { 'Content-Type': contentType } });
+    } catch {}
+  }
 
   // ===== AUTH =====
   if (path === '/api/register' && method === 'POST') {
