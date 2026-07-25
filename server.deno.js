@@ -11,6 +11,8 @@ const PAYMENT_PROVIDER = 'crypto';
 const USDT_WALLET = 'TGRKziHYYbmvQ3JV5uMZqAjrrucAJHTMpv';
 const USDT_NETWORK = 'TRC20 (Tron)';
 const USD_RATES = { UAH: 41, RUB: 100, KZT: 500 };
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Nova Client <onboarding@resend.dev>";
 
 const PLANS = [
   { id: 'month', name: '1 месяц', priceUah: 50, priceRub: 100, priceKzt: 575, days: 30, lifetime: false },
@@ -72,8 +74,34 @@ async function verifyJwt(token) {
   } catch { return null; }
 }
 
-function publicUser(u) { return { id: u.id, username: u.username, role: u.role, license: u.license, balance: u.balance, createdAt: u.createdAt, hwid: u.hwid || null }; }
+function publicUser(u) { return { id: u.id, username: u.username, email: u.email || null, role: u.role, license: u.license, balance: u.balance, createdAt: u.createdAt, hwid: u.hwid || null }; }
 function licenseValid(u) { if (!u.license || !u.license.active) return false; if (u.license.type === 'lifetime') return true; return u.license.expiresAt && u.license.expiresAt > Date.now(); }
+
+// ===== EMAIL (Resend API) =====
+async function sendVerificationEmail(toEmail, code, username) {
+  if (!RESEND_API_KEY) { console.log('No RESEND_API_KEY, skipping email. Code:', code); return false; }
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0E0818;font-family:Segoe UI,sans-serif">
+<div style="max-width:480px;margin:20px auto;background:#1C1430;border-radius:16px;padding:32px;border:1px solid #3D2459">
+<div style="text-align:center;margin-bottom:24px"><span style="font-size:28px;font-weight:800;background:linear-gradient(90deg,#FF8FC7,#C45BFF);-webkit-background-clip:text;color:transparent">Nova Client</span></div>
+<h1 style="color:#E8D8F5;font-size:22px;margin:0 0 16px">Подтвердите email</h1>
+<p style="color:#8E72B0;font-size:15px;line-height:1.6">Привет, <b style="color:#FF8FC7">${username}</b>! Ваш код подтверждения:</p>
+<div style="text-align:center;margin:28px 0"><span style="font-size:36px;font-weight:800;letter-spacing:8px;color:#C45BFF;background:#2E1A48;padding:16px 32px;border-radius:12px">${code}</span></div>
+<p style="color:#8E72B0;font-size:13px">Если вы не регистрировались — проигнорируйте это письмо.</p>
+<hr style="border:none;border-top:1px solid #3D2459;margin:24px 0">
+<p style="color:#6B4D7A;font-size:11px;text-align:center">© 2026 Nova Client · Fabric 1.21.4</p>
+</div></body></html>`;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: FROM_EMAIL, to: [toEmail], subject: "Nova Client — код подтверждения", html })
+    });
+    const data = await res.json();
+    if (!res.ok) { console.log('Resend error:', JSON.stringify(data)); return false; }
+    console.log('Email sent to', toEmail);
+    return true;
+  } catch (e) { console.log('Email send failed:', e.message); return false; }
+}
 
 async function seedOwner() {
   try {
@@ -123,7 +151,8 @@ const serve = async (req) => {
       const u = { id, username, passwordHash: await hashPwd(password), email, verified: false, verifyCode, role: 'user', hwid: null, license: { type: null, expiresAt: null, active: false }, balance: 0, createdAt: Date.now() };
       users.push(u);
       await setK('users', users); await setK('counter', id + 1);
-      return sendJson({ token: await makeJwt({ id, username, role: 'user' }), user: publicUser(u), verifyCode, needVerify: true });
+      const emailSent = await sendVerificationEmail(email, verifyCode, username);
+      return sendJson({ token: await makeJwt({ id, username, role: 'user' }), user: publicUser(u), needVerify: true, emailSent });
     }
     if (path === '/api/verify' && method === 'POST') {
       const { code } = await json();
@@ -137,12 +166,23 @@ const serve = async (req) => {
       await setK('users', users);
       return sendJson({ token: await makeJwt({ id: u.id, username: u.username, role: u.role }), user: publicUser(u), verified: true });
     }
+    if (path === '/api/resend' && method === 'POST') {
+      if (!authUser) return sendJson({ error: 'Нет токена' }, 401);
+      const users = await getK('users', []);
+      const u = users.find(x => x.id === authUser.id);
+      if (!u || u.verified) return sendJson({ error: 'Не найден или уже подтверждён' }, 400);
+      const emailSent = await sendVerificationEmail(u.email, u.verifyCode, u.username);
+      return sendJson({ emailSent });
+    }
     if (path === '/api/login' && method === 'POST') {
       const { username, password } = await json();
       const users = await getK('users', []);
       const u = users.find(x => x.username.toLowerCase() === (username || '').toLowerCase());
       if (!u || !(await verifyPwd(password || '', u.passwordHash))) return sendJson({ error: 'Неверный логин или пароль' }, 401);
-      if (!u.verified) return sendJson({ error: 'Email не подтверждён. Введите код с почты.', needVerify: true, verifyCode: u.verifyCode }, 403);
+      if (!u.verified) {
+        const emailSent = await sendVerificationEmail(u.email, u.verifyCode, u.username);
+        return sendJson({ error: 'Email не подтверждён. Код отправлен на почту.', needVerify: true, emailSent }, 403);
+      }
       return sendJson({ token: await makeJwt({ id: u.id, username: u.username, role: u.role }), user: publicUser(u) });
     }
     if (path === '/api/me' && method === 'GET') {

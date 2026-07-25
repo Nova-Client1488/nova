@@ -180,33 +180,34 @@ function authPage(isRegister) {
         method: 'POST', body: JSON.stringify({ username, password, email })
       });
       if (data.needVerify) {
-        verifyPage(data.verifyCode, data.token, data.user);
+        verifyPage(null, data.token, data.user, data.emailSent);
         return;
       }
       saveAuth(data.token, data.user);
       box.innerHTML = alertBox('Успешно! Перенаправление...', 'ok');
       setTimeout(() => location.hash = '#/dashboard', 600);
     } catch (e) {
-      if (e.needVerify) { verifyPage(e.verifyCode, e.token); return; }
+      if (e.needVerify) { verifyPage(null, e.token, null, e.emailSent); return; }
       box.innerHTML = alertBox(e.error || 'Ошибка');
     }
   };
   document.getElementById('u-password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
 }
 
-function verifyPage(sentCode, tempToken, tempUser) {
+function verifyPage(sentCode, tempToken, tempUser, emailSent) {
+  const hint = emailSent === false ? 'Не удалось отправить письмо. Попробуйте позже.' : 'Код отправлен на вашу почту';
   app.innerHTML = `<div class="auth-wrap"><div class="auth-card">
-    <h2>Подтверждение email</h2><p class="sub">Введите код, отправленный на почту</p>
+    <h2>Подтверждение email</h2><p class="sub">${hint}</p>
     <div id="verify-alert"></div>
     <div class="field"><label>Код подтверждения</label><input id="u-code" placeholder="6-значный код"></div>
     <button class="btn btn-pink btn-block" id="verify-submit">Подтвердить</button>
-    <div class="auth-switch">Код: <b style="color:#ff8fc7">${sentCode}</b> (для теста — потом будет на почте)</div>
+    <div class="auth-switch"><a id="resend-code">Отправить код снова</a></div>
   </div></div>`;
+  if (tempToken) localStorage.setItem('nova_token', tempToken);
   document.getElementById('verify-submit').onclick = async () => {
     const code = document.getElementById('u-code').value.trim();
     const box = document.getElementById('verify-alert');
     try {
-      localStorage.setItem('nova_token', tempToken);
       const data = await api('/api/verify', { method: 'POST', body: JSON.stringify({ code }) });
       saveAuth(data.token, data.user);
       box.innerHTML = alertBox('Email подтверждён! Перенаправление...', 'ok');
@@ -214,6 +215,10 @@ function verifyPage(sentCode, tempToken, tempUser) {
     } catch (e) {
       box.innerHTML = alertBox(e.error || 'Неверный код');
     }
+  };
+  const resend = document.getElementById('resend-code');
+  if (resend) resend.onclick = async () => {
+    try { await api('/api/resend', { method: 'POST' }); } catch {}
   };
 }
 
