@@ -2,7 +2,6 @@
 // Uses Web Crypto API (PBKDF2 for password hashing, HMAC-SHA256 for JWT)
 // Uses Deno KV for persistent storage (free on Deno Deploy)
 
-import { parse } from "https://deno.land/std/html/mod.ts";
 
 const PORT = Deno.env.get("PORT") || 3000;
 const JWT_SECRET = Deno.env.get("JWT_SECRET") || "nova-jwt-secret-CHANGE-2026";
@@ -151,6 +150,7 @@ const serve = async (req) => {
   let path = url.pathname;
   if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
   const method = req.method;
+  console.log(`[REQ] ${method} ${path}`);
 
   // CORS + JSON
   const json = async () => {
