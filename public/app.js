@@ -159,10 +159,12 @@ function authPage(isRegister) {
   const title = isRegister ? 'Регистрация' : 'Вход';
   const sub = isRegister ? 'Создайте аккаунт Nova Client' : 'Войдите в личный кабинет';
   const switchTxt = isRegister ? 'Уже есть аккаунт? <a id="sw">Войти</a>' : 'Нет аккаунта? <a id="sw">Зарегистрироваться</a>';
+  const emailField = isRegister ? '<div class="field"><label>Email</label><input id="u-email" type="email" placeholder="Ваш email"></div>' : '';
   app.innerHTML = `<div class="auth-wrap"><div class="auth-card">
     <h2>${title}</h2><p class="sub">${sub}</p>
     <div id="auth-alert"></div>
     <div class="field"><label>Логин</label><input id="u-username" placeholder="Ваш логин"></div>
+    ${emailField}
     <div class="field"><label>Пароль</label><input id="u-password" type="password" placeholder="Ваш пароль"></div>
     <button class="btn btn-pink btn-block" id="auth-submit">${title}</button>
     <div class="auth-switch">${switchTxt}</div>
@@ -171,17 +173,48 @@ function authPage(isRegister) {
   document.getElementById('auth-submit').onclick = async () => {
     const username = document.getElementById('u-username').value.trim();
     const password = document.getElementById('u-password').value;
+    const email = isRegister ? document.getElementById('u-email').value.trim() : '';
     const box = document.getElementById('auth-alert');
     try {
       const data = await api('/api/' + (isRegister ? 'register' : 'login'), {
-        method: 'POST', body: JSON.stringify({ username, password })
+        method: 'POST', body: JSON.stringify({ username, password, email })
       });
+      if (data.needVerify) {
+        verifyPage(data.verifyCode, data.token, data.user);
+        return;
+      }
       saveAuth(data.token, data.user);
       box.innerHTML = alertBox('Успешно! Перенаправление...', 'ok');
       setTimeout(() => location.hash = '#/dashboard', 600);
-    } catch (e) { box.innerHTML = alertBox(e.error || 'Ошибка'); }
+    } catch (e) {
+      if (e.needVerify) { verifyPage(e.verifyCode, e.token); return; }
+      box.innerHTML = alertBox(e.error || 'Ошибка');
+    }
   };
   document.getElementById('u-password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
+}
+
+function verifyPage(sentCode, tempToken, tempUser) {
+  app.innerHTML = `<div class="auth-wrap"><div class="auth-card">
+    <h2>Подтверждение email</h2><p class="sub">Введите код, отправленный на почту</p>
+    <div id="verify-alert"></div>
+    <div class="field"><label>Код подтверждения</label><input id="u-code" placeholder="6-значный код"></div>
+    <button class="btn btn-pink btn-block" id="verify-submit">Подтвердить</button>
+    <div class="auth-switch">Код: <b style="color:#ff8fc7">${sentCode}</b> (для теста — потом будет на почте)</div>
+  </div></div>`;
+  document.getElementById('verify-submit').onclick = async () => {
+    const code = document.getElementById('u-code').value.trim();
+    const box = document.getElementById('verify-alert');
+    try {
+      localStorage.setItem('nova_token', tempToken);
+      const data = await api('/api/verify', { method: 'POST', body: JSON.stringify({ code }) });
+      saveAuth(data.token, data.user);
+      box.innerHTML = alertBox('Email подтверждён! Перенаправление...', 'ok');
+      setTimeout(() => location.hash = '#/dashboard', 600);
+    } catch (e) {
+      box.innerHTML = alertBox(e.error || 'Неверный код');
+    }
+  };
 }
 
 // ===== ЛИЧНЫЙ КАБИНЕТ =====

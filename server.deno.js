@@ -110,22 +110,39 @@ const serve = async (req) => {
     if (path === '/api/debug' && method === 'GET') return sendJson({ path, method, ok: true });
 
     if (path === '/api/register' && method === 'POST') {
-      const { username, password } = await json();
-      if (!username || !password) return sendJson({ error: 'Введите логин и пароль' }, 400);
-      if (username.length < 3) return sendJson({ error: 'Логин минимум 3' }, 400);
-      if (password.length < 4) return sendJson({ error: 'Пароль минимум4' }, 400);
+      const { username, password, email } = await json();
+      if (!username || !password || !email) return sendJson({ error: 'Заполните все поля' }, 400);
+      if (username.length < 3) return sendJson({ error: 'Логин минимум 3 символа' }, 400);
+      if (password.length < 4) return sendJson({ error: 'Пароль минимум 4 символа' }, 400);
+      if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) return sendJson({ error: 'Неверный email' }, 400);
       const users = await getK('users', []);
       if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) return sendJson({ error: 'Логин занят' }, 409);
+      if (users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase())) return sendJson({ error: 'Email уже используется' }, 409);
       const id = await getK('counter', 1);
-      users.push({ id, username, passwordHash: await hashPwd(password), role: 'user', hwid: null, license: { type: null, expiresAt: null, active: false }, balance: 0, createdAt: Date.now() });
+      const verifyCode = String(Math.floor(100000 + Math.random() * 900000));
+      const u = { id, username, passwordHash: await hashPwd(password), email, verified: false, verifyCode, role: 'user', hwid: null, license: { type: null, expiresAt: null, active: false }, balance: 0, createdAt: Date.now() };
+      users.push(u);
       await setK('users', users); await setK('counter', id + 1);
-      return sendJson({ token: await makeJwt({ id, username, role: 'user' }), user: publicUser(users[users.length - 1]) });
+      return sendJson({ token: await makeJwt({ id, username, role: 'user' }), user: publicUser(u), verifyCode, needVerify: true });
+    }
+    if (path === '/api/verify' && method === 'POST') {
+      const { code } = await json();
+      if (!authUser || !code) return sendJson({ error: 'Нужен код' }, 400);
+      const users = await getK('users', []);
+      const u = users.find(x => x.id === authUser.id);
+      if (!u) return sendJson({ error: 'Не найден' }, 404);
+      if (u.verified) return sendJson({ error: 'Уже подтверждён' }, 400);
+      if (u.verifyCode !== code) return sendJson({ error: 'Неверный код' }, 400);
+      u.verified = true;
+      await setK('users', users);
+      return sendJson({ token: await makeJwt({ id: u.id, username: u.username, role: u.role }), user: publicUser(u), verified: true });
     }
     if (path === '/api/login' && method === 'POST') {
       const { username, password } = await json();
       const users = await getK('users', []);
       const u = users.find(x => x.username.toLowerCase() === (username || '').toLowerCase());
       if (!u || !(await verifyPwd(password || '', u.passwordHash))) return sendJson({ error: 'Неверный логин или пароль' }, 401);
+      if (!u.verified) return sendJson({ error: 'Email не подтверждён. Введите код с почты.', needVerify: true, verifyCode: u.verifyCode }, 403);
       return sendJson({ token: await makeJwt({ id: u.id, username: u.username, role: u.role }), user: publicUser(u) });
     }
     if (path === '/api/me' && method === 'GET') {
