@@ -158,18 +158,6 @@ const serve = async (req) => {
   }
   const adminOnly = () => authUser && (authUser.role === 'owner' || authUser.role === 'admin');
 
-  // Static files - serve from public/ directly (no Deno Deploy static dir needed)
-  if (method === 'GET') {
-    let filePath = 'public' + (path === '/' ? '/index.html' : path);
-    const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
-    try {
-      const data = await Deno.readFile(filePath);
-      const ext = filePath.substring(filePath.lastIndexOf('.'));
-      const contentType = types[ext] || 'application/octet-stream';
-      return new Response(data, { headers: { 'Content-Type': contentType } });
-    } catch {}
-  }
-
   // ===== AUTH =====
   if (path === '/api/register' && method === 'POST') {
     const { username, password } = await json();
@@ -352,9 +340,21 @@ const serve = async (req) => {
     } catch { return sendJson({ error: 'Jar не найдена' }, 404); }
   }
 
-  // SPA routes
+// SPA routes
   const spaRoutes = ['/login', '/register', '/dashboard', '/checkout', '/purchase', '/admin', '/pricing'];
   if (method === 'GET' && spaRoutes.includes(path)) return sendFile('public/index.html', 'text/html');
+
+  // Static files - serve from public/ directly (no Deno Deploy static dir needed)
+  if (method === 'GET') {
+    let filePath = 'public' + (path === '/' ? '/index.html' : path);
+    const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
+    try {
+      const data = await Deno.readFile(filePath);
+      const ext = filePath.substring(filePath.lastIndexOf('.'));
+      const contentType = types[ext] || 'application/octet-stream';
+      return new Response(data, { headers: { 'Content-Type': contentType } });
+    } catch {}
+  }
 
   return sendJson({ error: 'Not found' }, 404);
 };
