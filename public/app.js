@@ -154,7 +154,7 @@ function authPage(isRegister) {
   const title = isRegister ? '\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044F' : '\u0412\u0445\u043E\u0434';
   const sub = isRegister ? '\u0421\u043E\u0437\u0434\u0430\u0439\u0442\u0435 \u0430\u043A\u043A\u0430\u0443\u043D\u0442 Nova Client' : '\u0412\u043E\u0439\u0434\u0438\u0442\u0435 \u0432 \u043B\u0438\u0447\u043D\u044B\u0439 \u043A\u0430\u0431\u0438\u043D\u0435\u0442';
   const switchTxt = isRegister ? '\u0423\u0436\u0435 \u0435\u0441\u0442\u044C \u0430\u043A\u043A\u0430\u0443\u043D\u0442? <a id="sw">\u0412\u043E\u0439\u0442\u0438</a>' : '\u041D\u0435\u0442 \u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430? <a id="sw">\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043E\u0432\u0430\u0442\u044C\u0441\u044F</a>';
-  const emailField = isRegister ? '<div class="field"><label>Email</label><input id="u-email" type="email" placeholder="\u0412\u0430\u0448 email"></div>' : '';
+  const emailField = '';
   app.innerHTML = `<div class="auth-wrap"><div class="auth-card">
     <h2>${title}</h2><p class="sub">${sub}</p>
     <div id="auth-alert"></div>
@@ -168,18 +168,15 @@ function authPage(isRegister) {
   document.getElementById('auth-submit').onclick = async () => {
     const username = document.getElementById('u-username').value.trim();
     const password = document.getElementById('u-password').value;
-    const email = isRegister ? document.getElementById('u-email').value.trim() : '';
     const box = document.getElementById('auth-alert');
     try {
       const data = await api('/api/' + (isRegister ? 'register' : 'login'), {
-        method: 'POST', body: JSON.stringify({ username, password, email })
+        method: 'POST', body: JSON.stringify({ username, password })
       });
-      if (data.needVerify) { verifyPage(null, data.token, data.user, data.emailSent); return; }
       saveAuth(data.token, data.user);
-      box.innerHTML = alertBox('\u0423\u0441\u043F\u0435\u0448\u043D\u043E! \u041F\u0435\u0440\u0435\u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435...', 'ok');
+      box.innerHTML = alertBox('\u0423\u0441\u043F\u0435\u0448\u043D\u043E!', 'ok');
       setTimeout(() => location.hash = '#/dashboard', 600);
     } catch (e) {
-      if (e.needVerify) { verifyPage(null, e.token, null, e.emailSent); return; }
       box.innerHTML = alertBox(e.error || '\u041E\u0448\u0438\u0431\u043A\u0430');
     }
   };
@@ -403,7 +400,7 @@ async function adminPage() {
     document.querySelectorAll('.grant-sel').forEach(s => s.onchange = async (e) => {
       const pid = e.target.value; if (!pid) return;
       if (!confirm('\u0412\u044B\u0434\u0430\u0442\u044C?')) { e.target.value = ''; return; }
-      try { await api('/api/admin/user/' + e.target.dataset.uid + '/grant', { method: 'POST', body: JSON.stringify({ planId: pid }) }); adminPage(); }
+      try { await api('/api/admin/user/' + e.target.dataset.uid + '/grant', { method: 'POST', body: JSON.stringify({ planId: pid }) }); alert('\\u041F\\u043E\\u0434\\u043F\\u0438\\u0441\\u043A\\u0430 \\u0432\\u044B\\u0434\\u0430\\u043D\\u0430!'); adminPage(); }
       catch (err) { alert(err.error); e.target.value = ''; }
     });
   } catch (e) { app.innerHTML += alertBox(e.error || '\u041E\u0448\u0438\u0431\u043A\u0430'); }
