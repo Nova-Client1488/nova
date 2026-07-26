@@ -3,40 +3,42 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'nova-secret-change-me-please';
 const DB_FILE = path.join(__dirname, 'db.json');
-const MONGODB_URI = process.env.MONGODB_URI;
-const LAUNCHER_DIR = process.env.LAUNCHER_DIR || 'C:\\Users\\rudoy\\Desktop\\Nova Launcher';
+const DATABASE_URL = process.env.DATABASE_URL;
+const LAUNCHER_DIR = process.env.LAUNCHER_DIR || '';
 
-// ===== MONGODB (optional) =====
-let mongoClient = null;
-let mongoDb = null;
-let useMongo = false;
-if (MONGODB_URI) {
+// ===== POSTGRESQL (Render) / JSON fallback =====
+let pgPool = null;
+let usePg = false;
+
+async function initPg() {
+  if (!DATABASE_URL) return;
   try {
-    const { MongoClient } = require('mongodb');
-    mongoClient = new MongoClient(MONGODB_URI);
-    mongoClient.connect().then(() => {
-      mongoDb = mongoClient.db('nova');
-      useMongo = true;
-      console.log('MongoDB connected');
-      seedOwner();
-    }).catch(e => console.log('MongoDB failed, using JSON:', e.message));
-  } catch (e) { console.log('mongodb driver not installed, using JSON'); }
+    pgPool = new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS nova_data (
+        key TEXT PRIMARY KEY,
+        value JSONB
+      )
+    `);
+    usePg = true;
+    console.log('PostgreSQL connected');
+    await seedOwner();
+  } catch (e) { console.log('PostgreSQL failed, using JSON:', e.message); }
 }
 
 async function loadDB() {
-  if (useMongo && mongoDb) {
-    const doc = await mongoDb.collection('data').findOne({ _id: 'main' });
-    if (!doc) {
-      const seed = { _id: 'main', users: [], orders: [], counter: 1 };
-      await mongoDb.collection('data').insertOne(seed);
-      return seed;
-    }
-    return doc;
+  if (usePg && pgPool) {
+    const res = await pgPool.query('SELECT value FROM nova_data WHERE key = $1', ['main']);
+    if (res.rows.length > 0) return res.rows[0].value;
+    const seed = { users: [], orders: [], counter: 1 };
+    await pgPool.query('INSERT INTO nova_data (key, value) VALUES ($1, $2)', ['main', JSON.stringify(seed)]);
+    return seed;
   }
   if (!fs.existsSync(DB_FILE)) {
     const seed = { users: [], orders: [], counter: 1 };
@@ -46,12 +48,14 @@ async function loadDB() {
 }
 
 async function saveDB(db) {
-  if (useMongo && mongoDb) {
-    await mongoDb.collection('data').updateOne({ _id: 'main' }, { $set: db });
+  if (usePg && pgPool) {
+    await pgPool.query('UPDATE nova_data SET value = $1 WHERE key = $2', [JSON.stringify(db), 'main']);
     return;
   }
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
+
+initPg();
 
 // ===== КОНФИГ =====
 const CARD_NUMBER = '4441 1144 3770 6334';
