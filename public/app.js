@@ -236,7 +236,6 @@ async function dashboardPage() {
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
         <a href="#/pricing" class="btn btn-pink">\u041A\u0443\u043F\u0438\u0442\u044C / \u043F\u0440\u043E\u0434\u043B\u0438\u0442\u044C</a>
         <a href="/api/client/download" class="btn btn-green">\u2B07 \u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043B\u0430\u0443\u043D\u0447\u0435\u0440</a>
-        <a href="/api/client/jar" class="btn btn-ghost" style="font-size:13px">\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043C\u043E\u0434 (.jar)</a>\u0442\u044C \u043B\u0430\u0443\u043D\u0447\u0435\u0440</a>
         ${me.role === 'owner' || me.role === 'admin' ? '<a href="#/admin" class="btn btn-ghost">\u0410\u0434\u043C\u0438\u043D-\u043F\u0430\u043D\u0435\u043B\u044C</a>' : ''}
       </div>
     </div>
