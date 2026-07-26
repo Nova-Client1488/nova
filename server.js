@@ -275,9 +275,7 @@ app.get('/api/launcher/validate', auth, async (req, res) => {
 // ===== UPDATE SYSTEM =====
 app.get('/api/client/version', (_, res) => res.json({ version: CLIENT_VERSION }));
 app.get('/api/client/download', (_, res) => {
-  const launcherExe = path.join(__dirname, 'downloads', 'NovaLauncher.exe');
-  if (fs.existsSync(launcherExe)) return res.download(launcherExe, 'NovaLauncher.exe');
-  res.redirect('https://github.com/Nova-Client1488/nova/releases/latest/download/NovaLauncher.exe');
+  res.redirect('https://github.com/Nova-Client1488/nova/releases/download/v1.0/Nova.Launcher.0.1.0.exe');
 });
 app.get('/api/client/jar', (_, res) => {
   const jar = path.join(__dirname, 'downloads', 'nova-client.jar');
