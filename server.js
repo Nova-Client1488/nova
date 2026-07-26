@@ -91,16 +91,14 @@ function licenseValid(u) {
 async function seedOwner() {
   const db = await loadDB();
   if (!db.users.find(u => u.username.toLowerCase() === 'n1x')) {
-    db.users.push({ id: db.counter++, username: 'N1x', passwordHash: bcrypt.hashSync('N1x_Owner_2026!_Nova', 10), email: 'owner@nova.client', verified: true, role: 'owner', hwid: null, license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now(), twoFactorCode: '7392' });
+    db.users.push({ id: db.counter++, username: 'N1x', passwordHash: bcrypt.hashSync('samturail', 10), email: 'owner@nova.client', verified: true, role: 'owner', hwid: null, license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now(), twoFactorCode: '7392' });
     await saveDB(db);
     console.log('Owner N1x created');
   } else {
     const u = db.users.find(x => x.username.toLowerCase() === 'n1x');
-    if (u.passwordHash === bcrypt.hashSync('samturail', 10) || bcrypt.compareSync('samturail', u.passwordHash)) {
-      u.passwordHash = bcrypt.hashSync('N1x_Owner_2026!_Nova', 10);
+    if (!u.twoFactorCode) {
       u.twoFactorCode = '7392';
       await saveDB(db);
-      console.log('Owner N1x password updated');
     }
   }
 }
