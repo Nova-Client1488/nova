@@ -5,5 +5,3 @@ npm-debug.log*
 *.log
 .env
 package-lock.json
-
-downloads/NovaLauncher.exe
