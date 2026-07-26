@@ -78,12 +78,12 @@ function homePage() {
       </div>
     </div>
     <div class="features">
-      <div class="feat"><div class="ico">⚔️</div><h3>Combat модули</h3><p>KillAura с умными ротациями, AutoSwap, Criticals — плавно и эффективно.</p></div>
-      <div class="feat"><div class="ico">🎨</div><h3>Визуалы</h3><p>ESP, Chams, Skeleton, TargetESP, FullBright и красивый HUD с водяным знаком.</p></div>
-      <div class="feat"><div class="ico">🚀</div><h3>Лаунчер</h3><p>Свой лаунчер с авторизацией, выбором RAM и автообновлением конфигов.</p></div>
-      <div class="feat"><div class="ico">🛡️</div><h3>Байпасы</h3><p>Адаптация под античиты: Funtime, Grim, SpookyTime — ротации и обход ограничений.</p></div>
-      <div class="feat"><div class="ico">💾</div><h3>Облачные конфиги</h3><p>Синхронизация настроек между устройствами через ваш аккаунт.</p></div>
-      <div class="feat"><div class="ico">🌙</div><h3>Темы</h3><p>Несколько тем оформления и кастомный UI.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF8FC7" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6 3 3-6 6-3-3z"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg></div><h3>Combat модули</h3><p>KillAura с умными ротациями, AutoSwap, Criticals — плавно и эффективно.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C45BFF" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/></svg></div><h3>Визуалы</h3><p>ESP, Chams, Skeleton, TargetESP, FullBright и красивый HUD с водяным знаком.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF8FC7" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.16 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.16-1.62 0-5 0-5"/></svg></div><h3>Лаунчер</h3><p>Свой лаунчер с авторизацией, выбором RAM и автообновлением конфигов.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C45BFF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>Байпасы</h3><p>Адаптация под античиты: Funtime, Grim, SpookyTime — ротации и обход ограничений.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF8FC7" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><h3>Облачные конфиги</h3><p>Синхронизация настроек между устройствами через ваш аккаунт.</p></div>
+      <div class="feat"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C45BFF" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><h3>Темы</h3><p>Несколько тем оформления и кастомный UI.</p></div>
     </div>`;
 }
 
