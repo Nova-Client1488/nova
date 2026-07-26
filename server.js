@@ -277,7 +277,7 @@ app.get('/api/client/version', (_, res) => res.json({ version: CLIENT_VERSION })
 app.get('/api/client/download', (_, res) => {
   const launcherExe = path.join(__dirname, 'downloads', 'NovaLauncher.exe');
   if (fs.existsSync(launcherExe)) return res.download(launcherExe, 'NovaLauncher.exe');
-  res.status(404).json({ error: '\u041B\u0430\u0443\u043D\u0447\u0435\u0440 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D' });
+  res.redirect('https://github.com/Nova-Client1488/nova/releases/latest/download/NovaLauncher.exe');
 });
 app.get('/api/client/jar', (_, res) => {
   const jar = path.join(__dirname, 'downloads', 'nova-client.jar');
