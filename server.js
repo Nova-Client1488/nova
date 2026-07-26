@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'nova-secret-change-me';
 const DB_FILE = path.join(__dirname, 'db.json');
 const DATABASE_URL = process.env.DATABASE_URL;
+const NPBOX_URL = 'https://api.npoint.io/e4fd182923961ca329b0';
 
 const CARD_NUMBER = '4441 1144 3770 6334';
 const TELEGRAM = 'I1xD0';
@@ -55,12 +56,25 @@ async function loadDB() {
     await pgPool.query('INSERT INTO nova_data (key, value) VALUES ($1, $2)', ['main', JSON.stringify(seed)]);
     return seed;
   }
+  try {
+    const res = await fetch(NPBOX_URL);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.users) return data;
+    }
+  } catch (e) { console.log('npoint load failed:', e.message); }
   if (!fs.existsSync(DB_FILE)) { fs.writeFileSync(DB_FILE, JSON.stringify({ users: [], orders: [], counter: 1 }, null, 2)); }
   return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 }
 
 async function saveDB(db) {
-  if (usePg && pgPool) { await pgPool.query('UPDATE nova_data SET value = $1 WHERE key = $2', [JSON.stringify(db), 'main']); return; }
+  if (usePg && pgPool) {
+    await pgPool.query('UPDATE nova_data SET value = $1 WHERE key = $2', [JSON.stringify(db), 'main']);
+    return;
+  }
+  try {
+    await fetch(NPBOX_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(db) });
+  } catch (e) { console.log('npoint save failed:', e.message); }
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
 
