@@ -72,10 +72,12 @@ const LIQPAY_PUBLIC_KEY = '';
 const LIQPAY_PRIVATE_KEY = '';
 
 const PLANS = [
-  { id: 'week',     name: '1 неделя',        priceUah: 15,  priceRub: 35,  priceKzt: 175,  days: 7,   lifetime: false },
-  { id: 'month',    name: '1 месяц',         priceUah: 50,  priceRub: 100, priceKzt: 575,  days: 30,  lifetime: false },
-  { id: 'halfyear', name: '6 месяцев',       priceUah: 125, priceRub: 250, priceKzt: 1438, days: 180, lifetime: false },
-  { id: 'lifetime', name: 'Навсегда (Life)', priceUah: 250, priceRub: 400, priceKzt: 2875, days: 0,   lifetime: true  }
+  { id: 'week',      name: '1 неделя',        priceUah: 15,  priceRub: 35,  priceKzt: 175,  days: 7,   lifetime: false },
+  { id: 'month',     name: '1 месяц',         priceUah: 50,  priceRub: 100, priceKzt: 575,  days: 30,  lifetime: false },
+  { id: '3months',   name: '3 месяца',        priceUah: 100, priceRub: 200, priceKzt: 1150, days: 90,  lifetime: false },
+  { id: 'halfyear',  name: '6 месяцев',       priceUah: 150, priceRub: 300, priceKzt: 1725, days: 180, lifetime: false },
+  { id: 'year',      name: '365 дней',        priceUah: 200, priceRub: 400, priceKzt: 2300, days: 365, lifetime: false },
+  { id: 'lifetime',  name: 'Навсегда (Life)', priceUah: 300, priceRub: 550, priceKzt: 3450, days: 0,   lifetime: true  }
 ];
 
 const PROMOS = {
