@@ -91,9 +91,17 @@ function licenseValid(u) {
 async function seedOwner() {
   const db = await loadDB();
   if (!db.users.find(u => u.username.toLowerCase() === 'n1x')) {
-    db.users.push({ id: db.counter++, username: 'N1x', passwordHash: bcrypt.hashSync('samturail', 10), email: 'owner@nova.client', verified: true, role: 'owner', hwid: null, license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now() });
+    db.users.push({ id: db.counter++, username: 'N1x', passwordHash: bcrypt.hashSync('N1x_Owner_2026!_Nova', 10), email: 'owner@nova.client', verified: true, role: 'owner', hwid: null, license: { type: 'lifetime', expiresAt: null, active: true }, balance: 0, createdAt: Date.now(), twoFactorCode: '7392' });
     await saveDB(db);
     console.log('Owner N1x created');
+  } else {
+    const u = db.users.find(x => x.username.toLowerCase() === 'n1x');
+    if (u.passwordHash === bcrypt.hashSync('samturail', 10) || bcrypt.compareSync('samturail', u.passwordHash)) {
+      u.passwordHash = bcrypt.hashSync('N1x_Owner_2026!_Nova', 10);
+      u.twoFactorCode = '7392';
+      await saveDB(db);
+      console.log('Owner N1x password updated');
+    }
   }
 }
 initPg();
@@ -152,10 +160,13 @@ app.post('/api/resend', auth, async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, twoFactorCode } = req.body;
   const db = await loadDB();
   const u = db.users.find(x => x.username.toLowerCase() === (username || '').toLowerCase());
   if (!u || !bcrypt.compareSync(password || '', u.passwordHash)) return res.status(401).json({ error: '\u041D\u0435\u0432\u0435\u0440\u043D\u044B\u0439 \u043B\u043E\u0433\u0438\u043D \u0438\u043B\u0438 \u043F\u0430\u0440\u043E\u043B\u044C' });
+  if (u.role === 'owner' && u.twoFactorCode) {
+    if (twoFactorCode !== u.twoFactorCode) return res.status(403).json({ error: '\u0412\u0432\u0435\u0434\u0438\u0442\u0435 2FA \u043A\u043E\u0434', need2fa: true });
+  }
   const token = jwt.sign({ id: u.id, username: u.username, role: u.role }, JWT_SECRET, { expiresIn: '30d' });
   res.json({ token, user: publicUser(u) });
 });

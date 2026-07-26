@@ -177,6 +177,25 @@ function authPage(isRegister) {
       box.innerHTML = alertBox('\u0423\u0441\u043F\u0435\u0448\u043D\u043E!', 'ok');
       setTimeout(() => location.hash = '#/dashboard', 600);
     } catch (e) {
+      if (e.need2fa) {
+        app.innerHTML = `<div class="auth-wrap"><div class="auth-card">
+          <h2>2FA \u043A\u043E\u0434</h2><p class="sub">\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043A\u043E\u0434 \u0434\u043B\u044F \u0432\u0445\u043E\u0434\u0430</p>
+          <div id="auth-alert"></div>
+          <div class="field"><label>2FA \u043A\u043E\u0434</label><input id="u-2fa" placeholder="4-\u0446\u0438\u0444\u0440\u044B"></div>
+          <button class="btn btn-pink btn-block" id="auth-2fa-submit">\u0412\u043E\u0439\u0442\u0438</button>
+        </div></div>`;
+        document.getElementById('auth-2fa-submit').onclick = async () => {
+          const code = document.getElementById('u-2fa').value.trim();
+          const box2 = document.getElementById('auth-alert');
+          try {
+            const data2 = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password, twoFactorCode: code }) });
+            saveAuth(data2.token, data2.user);
+            box2.innerHTML = alertBox('\u0423\u0441\u043F\u0435\u0448\u043D\u043E!', 'ok');
+            setTimeout(() => location.hash = '#/dashboard', 600);
+          } catch (e2) { box2.innerHTML = alertBox(e2.error || '\u041D\u0435\u0432\u0435\u0440\u043D\u044B\u0439 \u043A\u043E\u0434'); }
+        };
+        return;
+      }
       box.innerHTML = alertBox(e.error || '\u041E\u0448\u0438\u0431\u043A\u0430');
     }
   };
