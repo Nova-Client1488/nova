@@ -83,6 +83,7 @@ async function seedOwner() {
   }
 }
 initPg();
+seedOwner();
 
 // ===== MIDDLEWARE =====
 app.use(express.json());
