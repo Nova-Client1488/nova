@@ -92,7 +92,7 @@ function pricingPage() {
   app.innerHTML = `
     <div class="hero" style="padding-top:20px">
       <h1 style="font-size:48px">Тарифы</h1>
-      <p>Выберите подходящий план. Промокод <b style="color:var(--p2)">Release</b> даёт скидку 50% на любой тариф.</p>
+      <p>Выберите подходящий план.</p>
     </div>
     <div class="pricing" id="plans"></div>`;
   fetch('/api/plans').then(r => r.json()).then(plans => {
@@ -303,7 +303,7 @@ async function checkoutPage() {
     </div>
     <div class="co-step"><h3>2. Промокод</h3>
       <div style="display:flex;gap:10px">
-        <input id="promo-input" placeholder="Например: Release" style="flex:1;padding:12px 16px;border-radius:10px;background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.1);font-size:15px;outline:none">
+        <input id="promo-input" placeholder="Промокод" style="flex:1;padding:12px 16px;border-radius:10px;background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.1);font-size:15px;outline:none">
         <button class="btn btn-ghost" id="promo-apply">Применить</button>
       </div>
       <div id="promo-msg" style="margin-top:10px;font-size:14px"></div>
