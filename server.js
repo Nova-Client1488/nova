@@ -30,7 +30,8 @@ const PLANS = [
 ];
 
 const PROMOS = {
-  'Release': { discountPercent: 50, description: '\u0420\u0435\u043B\u0438\u0437 \u2014 \u0441\u043A\u0438\u0434\u043A\u0430 50%' }
+  'Release': { discountPercent: 50, description: '\u0420\u0435\u043B\u0438\u0437 \u2014 \u0441\u043A\u0438\u0434\u043A\u0430 50%' },
+  'T0moro': { discountPercent: 10, description: '\u0421\u043A\u0438\u0434\u043A\u0430 10%' }
 };
 
 // ===== PostgreSQL / JSON fallback =====
