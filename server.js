@@ -21,12 +21,12 @@ const USDT_NETWORK = 'TRC20 (Tron)';
 const USD_RATES = { UAH: 41, RUB: 100, KZT: 500 };
 
 const PLANS = [
-  { id: 'week',      name: '1 \u043D\u0435\u0434\u0435\u043B\u044F',        priceUah: 15,  priceRub: 35,  priceKzt: 175,  days: 7,   lifetime: false },
   { id: 'month',     name: '1 \u043C\u0435\u0441\u044F\u0446',             priceUah: 50,  priceRub: 100, priceKzt: 575,  days: 30,  lifetime: false },
   { id: '3months',   name: '3 \u043C\u0435\u0441\u044F\u0446\u0430',       priceUah: 100, priceRub: 200, priceKzt: 1150, days: 90,  lifetime: false },
-  { id: 'halfyear',  name: '6 \u043C\u0435\u0441\u044F\u0446\u0435\u0432', priceUah: 150, priceRub: 300, priceKzt: 1725, days: 180, lifetime: false },
+  { id: 'halfyear',  name: '6 \u043C\u0435\u0441\u044F\u0446\u0435\u0432',       priceUah: 150, priceRub: 300, priceKzt: 1725, days: 180, lifetime: false },
   { id: 'year',      name: '365 \u0434\u043D\u0435\u0439',                 priceUah: 200, priceRub: 400, priceKzt: 2300, days: 365, lifetime: false },
-  { id: 'lifetime',  name: '\u041D\u0430\u0432\u0441\u0435\u0433\u0434\u0430 (Life)', priceUah: 300, priceRub: 550, priceKzt: 3450, days: 0, lifetime: true }
+  { id: 'beta',       name: 'Beta (\u041D\u0430\u0432\u0441\u0435\u0433\u0434\u0430)',   priceUah: 100, priceRub: 200, priceKzt: 1150, days: 0,   lifetime: true  },
+  { id: 'lifetime',  name: '\u041D\u0430\u0432\u0441\u0435\u0433\u0434\u0430 (Life)', priceUah: 300, priceRub: 550, priceKzt: 3450, days: 0,   lifetime: true  }
 ];
 
 const PROMOS = {
