@@ -80,7 +80,7 @@ async function saveDB(db) {
 }
 
 function publicUser(u) {
-  return { id: u.id, username: u.username, email: u.email || null, verified: u.verified || false, role: u.role, license: u.license, balance: u.balance, createdAt: u.createdAt, hwid: u.hwid || null };
+  return { id: u.id, username: u.username, email: u.email || null, verified: u.verified || false, role: u.role, license: u.license, betaAccess: u.betaAccess || false, balance: u.balance, createdAt: u.createdAt, hwid: u.hwid || null };
 }
 
 function licenseValid(u) {
@@ -202,6 +202,13 @@ app.post('/api/order', auth, async (req, res) => {
   const { planId, promoCode } = req.body;
   const plan = PLANS.find(p => p.id === planId);
   if (!plan) return res.status(400).json({ error: '\u0422\u0430\u0440\u0438\u0444 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D' });
+  if (plan.id === 'beta') {
+    const db = await loadDB();
+    const user = db.users.find(x => x.id === req.user.id);
+    if (!user || !user.license || !user.license.active || user.license.type === 'beta' || user.license.type === 'lifetime') {
+      return res.status(403).json({ error: 'Beta \u043C\u043E\u0436\u043D\u043E \u043A\u0443\u0438\u043F\u044C \u0442\u043E\u043B\u044C\u043A\u043E \u043F\u0440\u0438 \u043D\u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0439 \u043F\u043E\u0434\u043F\u0438\u0441\u043A\u0438 (\u043D\u0435 beta/lifetime)' });
+    }
+  }
   let amount = plan.priceUah, discount = 0;
   if (promoCode) { const promo = PROMOS[promoCode.trim()]; if (promo) { discount = promo.discountPercent; amount = +(plan.priceUah * (1 - discount / 100)).toFixed(2); } }
   const db = await loadDB();
@@ -226,8 +233,14 @@ app.post('/api/admin/order/:id/approve', auth, adminOnly, async (req, res) => {
   const u = db.users.find(x => x.id === o.userId);
   if (!u) return res.status(404).json({ error: '\u042E\u0437\u0435\u0440 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D' });
   const plan = PLANS.find(p => p.id === o.planId);
-  if (plan.lifetime) u.license = { type: 'lifetime', expiresAt: null, active: true };
-  else { const base = (u.license && u.license.expiresAt && u.license.expiresAt > Date.now()) ? u.license.expiresAt : Date.now(); u.license = { type: plan.id, expiresAt: base + plan.days * 86400000, active: true }; }
+  if (plan.id === 'beta') {
+    u.betaAccess = true;
+  } else if (plan.lifetime) {
+    u.license = { type: 'lifetime', expiresAt: null, active: true };
+  } else {
+    const base = (u.license && u.license.expiresAt && u.license.expiresAt > Date.now()) ? u.license.expiresAt : Date.now();
+    u.license = { type: plan.id, expiresAt: base + plan.days * 86400000, active: true };
+  }
   o.status = 'approved'; o.approvedAt = Date.now();
   await saveDB(db);
   res.json({ order: o, user: publicUser(u) });
@@ -248,8 +261,14 @@ app.post('/api/admin/user/:id/grant', auth, adminOnly, async (req, res) => {
   if (!u) return res.status(404).json({ error: '\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D' });
   const plan = PLANS.find(p => p.id === req.body.planId);
   if (!plan) return res.status(400).json({ error: '\u0422\u0430\u0440\u0438\u0444 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D' });
-  if (plan.lifetime) u.license = { type: 'lifetime', expiresAt: null, active: true };
-  else { const base = (u.license && u.license.expiresAt && u.license.expiresAt > Date.now()) ? u.license.expiresAt : Date.now(); u.license = { type: plan.id, expiresAt: base + plan.days * 86400000, active: true }; }
+  if (plan.id === 'beta') {
+    u.betaAccess = true;
+  } else if (plan.lifetime) {
+    u.license = { type: 'lifetime', expiresAt: null, active: true };
+  } else {
+    const base = (u.license && u.license.expiresAt && u.license.expiresAt > Date.now()) ? u.license.expiresAt : Date.now();
+    u.license = { type: plan.id, expiresAt: base + plan.days * 86400000, active: true };
+  }
   await saveDB(db); res.json(publicUser(u));
 });
 
