@@ -301,7 +301,7 @@ const serve = async (req) => {
 
   // ===== STATIC FILES (server handles everything) =====
   if (method === 'GET') {
-    const filePath = 'public' + (path === '/' ? '/index.html' : path);
+    const filePath = 'Public' + (path === '/' ? '/index.html' : path);
     const types = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
     try {
       const data = await Deno.readFile(filePath);
