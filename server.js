@@ -294,7 +294,6 @@ app.get('/api/client/version', (_, res) => res.json({ version: CLIENT_VERSION })
 app.get('/api/client/download', (_, res) => {
   res.redirect('https://github.com/Nova-Client1488/nova/releases/download/v1.0/Nova.Launcher.0.1.0.exe');
 });
-});
 app.get('/api/client/jar', (_, res) => {
   const jar = path.join(__dirname, 'downloads', 'nova-client.jar');
   if (fs.existsSync(jar)) return res.download(jar, 'nova-client.jar');
