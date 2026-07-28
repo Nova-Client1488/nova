@@ -240,7 +240,7 @@ async function dashboardPage() {
       status = '\u0410\u043A\u0442\u0438\u0432\u043D\u0430'; statusClass = 'active'; meta = `\u041E\u0441\u0442\u0430\u043B\u043E\u0441\u044C: ${days} \u0434\u043D. \u00B7 \u0434\u043E ${new Date(lic.expiresAt).toLocaleDateString('ru-RU')}`;
     } else { status = '\u0418\u0441\u0442\u0435\u043A\u043B\u0430'; statusClass = 'inactive'; meta = '\u041A\u0443\u043F\u0438\u0442\u0435 \u043F\u043E\u0434\u043F\u0438\u0441\u043A\u0443'; }
   } else { status = '\u041D\u0435\u0442 \u043B\u0438\u0446\u0435\u043D\u0437\u0438\u0438'; statusClass = 'inactive'; meta = '\u041A\u0443\u043F\u0438\u0442\u0435 \u0442\u0430\u0440\u0438\u0444'; }
-  const roleTag = me.role === 'owner' ? '<span class="tag tag-owner">Owner</span>' : me.role === 'admin' ? '<span class="tag tag-admin">Admin</span>' : '<span class="tag tag-user">User</span>';
+  const roleTag = me.role === 'owner' ? '<span class="tag tag-owner">Owner</span>' : me.role === 'admin' ? '<span class="tag tag-admin">Admin</span>' : me.role === 'Media' ? '<span class="tag tag-owner" style="background:linear-gradient(135deg,#e74c3c,#c0392b">Media</span>' : '<span class="tag tag-user">User</span>';
   app.innerHTML = `<div class="dash">
     <h1>\u041F\u0440\u0438\u0432\u0435\u0442, ${me.username} ${roleTag}</h1>
     <div class="dash-grid">
@@ -408,7 +408,7 @@ async function adminPage() {
       return `<option value="${id}">${n}</option>`;
     }).join('');
     document.getElementById('admin-users').innerHTML = `<table><thead><tr><th>ID</th><th>\u041B\u043E\u0433\u0438\u043D</th><th>\u0420\u043E\u043B\u044C</th><th>\u041B\u0438\u0446\u0435\u043D\u0437\u0438\u044F</th><th>HWID</th><th>\u0412\u044B\u0434\u0430\u0442\u044C</th><th>\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F</th></tr></thead><tbody>${users.map(u => {
-      const tag = u.role === 'owner' ? '<span class="tag tag-owner">Owner</span>' : u.role === 'admin' ? '<span class="tag tag-admin">Admin</span>' : '<span class="tag tag-user">User</span>';
+      const tag = u.role === 'owner' ? '<span class="tag tag-owner">Owner</span>' : u.role === 'admin' ? '<span class="tag tag-admin">Admin</span>' : u.role === 'Media' ? '<span class="tag tag-owner" style="background:linear-gradient(135deg,#e74c3c,#c0392b">Media</span>' : '<span class="tag tag-user">User</span>';
       const lic = u.license && u.license.active ? (u.license.type === 'lifetime' ? 'Life \u2713' : '\u0434\u043E ' + new Date(u.license.expiresAt).toLocaleDateString('ru-RU')) : '<span style="color:#666">\u043D\u0435\u0442</span>';
       const hw = u.hwid ? `<span style="font-family:Consolas;font-size:11px">${u.hwid.substring(0,16)}\u2026</span>` : '<span style="color:#666">\u043D\u0435 \u043F\u0440\u0438\u0432\u044F\u0437\u0430\u043D</span>';
       const grant = `<select class="grant-sel" data-uid="${u.id}" style="padding:5px 8px;border-radius:7px;background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.1);font-size:12px">${grantOpts}</select>`;
