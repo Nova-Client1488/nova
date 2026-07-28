@@ -403,8 +403,8 @@ async function adminPage() {
     }).join('')}</tbody></table>` : '<p style="color:#666">\u0417\u0430\u043A\u0430\u0437\u043E\u0432 \u043D\u0435\u0442.</p>';
 
     const users = await api('/api/admin/users');
-    const grantOpts = '<option value="">\u2014 \u0432\u044B\u0434\u0430\u0442\u044C \u2014</option>' + ['week','month','3months','halfyear','year','lifetime'].map(id => {
-      const n = ({week:'1 \u043D\u0435\u0434\u0435\u043B\u044F',month:'1 \u043C\u0435\u0441\u044F\u0446','3months':'3 \u043C\u0435\u0441\u044F\u0446\u0430',halfyear:'6 \u043C\u0435\u0441\u044F\u0446\u0435\u0432',year:'365 \u0434\u043D\u0435\u0439',lifetime:'\u041D\u0430\u0432\u0441\u0435\u0433\u0434\u0430'})[id];
+    const grantOpts = '<option value="">\u2014 \u0432\u044B\u0434\u0430\u0442\u044C \u2014</option>' + ['week','month','3months','halfyear','year','beta','lifetime'].map(id => {
+      const n = ({week:'1 \u043D\u0435\u0434\u0435\u043B\u044F',month:'1 \u043C\u0435\u0441\u044F\u0446','3months':'3 \u043C\u0435\u0441\u044F\u0446\u0430',halfyear:'6 \u043C\u0435\u0441\u044F\u0446\u0435\u0432',year:'365 \u0434\u043D\u0435\u0439',beta:'Beta (\u041D\u0430\u0432\u0441\u0435\u0433\u0435\u0433\u0434\u0430)',lifetime:'\u041D\u0430\u0432\u0441\u0435\u0433\u0434\u0430 (Life)'})[id];
       return `<option value="${id}">${n}</option>`;
     }).join('');
     document.getElementById('admin-users').innerHTML = `<table><thead><tr><th>ID</th><th>\u041B\u043E\u0433\u0438\u043D</th><th>\u0420\u043E\u043B\u044C</th><th>\u041B\u0438\u0446\u0435\u043D\u0437\u0438\u044F</th><th>HWID</th><th>\u0412\u044B\u0434\u0430\u0442\u044C</th><th>\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F</th></tr></thead><tbody>${users.map(u => {
